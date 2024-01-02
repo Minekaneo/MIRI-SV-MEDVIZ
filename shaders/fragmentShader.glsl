@@ -28,7 +28,14 @@ in vec3 rayDirection;
 
 out vec4 frag_color;
 
-
+float CalculateY(float x) {
+  if (x < uTF.x || x > uTF.w) return 0.0;
+  else if (x > uTF.y && x < uTF.z) return 1.1;
+  else if (x < uTF.y) {
+    return (x - uTF.x) / (uTF.y-uTF.x);
+  }
+  else return (x - uTF.w) / (uTF.z-uTF.w);
+}
 
 void main(void) {
 
@@ -48,9 +55,9 @@ void main(void) {
   vec3 current = cameraPosition;
 
   for (float i = 0.0; i < rayLength; i += As ) {
-    float voxel = texture(uVolume, current).r;
+    float voxel = CalculateY(texture(uVolume, current).r);
 
-    totalColor += uTF * vec4(uTFColor, 1.0) * uTFOpacity * (1.0 - totalOpacity);
+    totalColor += vec4(uTFColor, 1.0) * uTFOpacity * (1.0 - totalOpacity);
     totalOpacity += uTFOpacity * (1.0 - totalOpacity) * voxel;
 
     if (totalOpacity >= 0.95) break;
