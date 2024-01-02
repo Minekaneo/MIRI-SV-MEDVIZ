@@ -77,6 +77,14 @@
           <label for="radius">Radius: </label><input type="number" id="light-radius-value" min="0.01" max="1" step="0.01" value="0.01" size="6">
           <label for="distance">Distance: </label><input type="number" id="light-distance-value" min="1" max="20" step="0.5" value="1" size="6">
           <label for="nRays">Number of rays: </label><input type="number" id="light-nRays-value" min="0" max="20" step="1" value="0" size="6">
+          <br>
+          Strategy: <label><input type="radio" name="options" id="strategy" value="0" checked>
+            Percentage
+        </label>
+        <label>
+            <input type="radio" name="options" value="1">
+            Accumulation
+        </label>
         </fieldset>
       </div>
     </div>

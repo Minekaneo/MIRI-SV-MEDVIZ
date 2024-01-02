@@ -147,6 +147,13 @@ function main() {
   } else {
     console.error('Button not found.');
   }
+  let currentStrategy = 0;
+  var radioButtons = document.getElementsByName('options');
+  radioButtons.forEach(function(radioButton){
+    radioButton.addEventListener('change', function() {
+      currentStrategy = this.value;
+    })
+  });
 
   // Set clear color to black, fully opaque
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -180,6 +187,7 @@ function main() {
       modelViewMatrix: gl.getUniformLocation(shaderProgram, "uModelViewMatrix"),
       normalMatrix: gl.getUniformLocation(shaderProgram, "uNormalMatrix"),
       uVolume: gl.getUniformLocation(shaderProgram, "uVolume"),
+      dimensions: gl.getUniformLocation(shaderProgram, "uDimensions"),
       tF:gl.getUniformLocation(shaderProgram, "uTF"),
       tFOpacity: gl.getUniformLocation(shaderProgram, "uTFOpacity"),
       tFColor: gl.getUniformLocation(shaderProgram, "uTFColor"),
@@ -188,6 +196,7 @@ function main() {
       lightRadius: gl.getUniformLocation(shaderProgram, "uLightRadius"),
       lightDistance: gl.getUniformLocation(shaderProgram, "uLightDistance"),
       lightNRays: gl.getUniformLocation(shaderProgram, "uLightNRays"),
+      strategy: gl.getUniformLocation(shaderProgram, "uStrategy"),
     },
   };
 
@@ -218,10 +227,19 @@ function main() {
       radius: document.getElementById('light-radius-value').value,
       distance: document.getElementById('light-distance-value').value,
       nRays: document.getElementById('light-nRays-value').value,
+      strategy: currentStrategy
     }
 
     //RENDER
-    drawScene(gl, programInfo, buffers, texture, camera, tF, light);
+    let dimensions = [1,1,1];
+    if(document.getElementById('dimX') != null)
+    {
+      dimensions = [parseInt(document.getElementById('dimX').textContent), 
+                    parseInt(document.getElementById('dimY').textContent), 
+                    parseInt(document.getElementById('dimZ').textContent)];
+      //console.log(dimensions);
+    }
+    drawScene(gl, programInfo, buffers, texture, camera, tF, light, dimensions);
   
     //POST-FRAME
     //Frame rate

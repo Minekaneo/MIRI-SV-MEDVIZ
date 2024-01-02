@@ -82,7 +82,7 @@ function setColorAttribute(gl, buffers, programInfo) {
   gl.enableVertexAttribArray(programInfo.attribLocations.vertexColor);
 }
 
-function drawScene(gl, programInfo, buffers, texture, camera, tF, light) {
+function drawScene(gl, programInfo, buffers, texture, camera, tF, light, dimensions) {
 
 
   gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
@@ -125,6 +125,7 @@ function drawScene(gl, programInfo, buffers, texture, camera, tF, light) {
   gl.uniform1f(programInfo.uniformLocations.lightRadius, light.radius);
   gl.uniform1f(programInfo.uniformLocations.lightDistance, light.distance);
   gl.uniform1i(programInfo.uniformLocations.lightNRays, light.nRays);
+  gl.uniform1i(programInfo.uniformLocations.strategy, light.strategy);
 
   //Textures
   if(texture != null) {
@@ -134,6 +135,8 @@ function drawScene(gl, programInfo, buffers, texture, camera, tF, light) {
     gl.bindTexture(gl.TEXTURE_3D, texture);
     // Tell the shader we bound the texture to texture unit 0
     gl.uniform1i(programInfo.uniformLocations.uVolume, 0);
+    //Tell the shader the dimensions
+    gl.uniform3f(programInfo.uniformLocations.dimensions, dimensions[0], dimensions[1], dimensions[2]);
   }
 
   {
