@@ -23,15 +23,38 @@ uniform highp sampler3D uVolume;
 
 //VARYINGS
 in vec3 vTextureCoord;
+in vec3 cameraPosition;
+in vec3 rayDirection;
 
 out vec4 frag_color;
 
 
 
 void main(void) {
-  highp vec4 texelColor = texture(uVolume, vTextureCoord);
 
-  frag_color = vec4(vTextureCoord, 1);
+  vec3 normalizedRayDirection = normalize(rayDirection);
+
+  float As = 0.01;
+  float MaxD = 5.0;
+  float totalOpacity = 0.0;
+  vec4 totalColor = vec4(0.0);
+  vec3 current = cameraPosition;
+
+  for (float i = 0.0; i < MaxD; i += As ) {
+    float voxel = texture(uVolume, current).r;
+
+    totalColor += uTF * vec4(uTFColor, 1.0) * uTFOpacity * (1.0 - totalOpacity);
+    totalOpacity += uTFOpacity * (1.0 - totalOpacity) * voxel;
+
+    if (totalOpacity >= 0.95) break;
+
+    current += normalizedRayDirection * As;
+    
+  }
+
+  highp vec4 texelColor = totalColor;
+
+  frag_color = totalColor;
   
 }
 
