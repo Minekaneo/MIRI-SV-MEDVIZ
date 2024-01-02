@@ -32,15 +32,22 @@ out vec4 frag_color;
 
 void main(void) {
 
-  vec3 normalizedRayDirection = normalize(rayDirection);
+  vec4 entryPointView = uModelViewMatrix * vec4(vTextureCoord, 1.0);
+  vec4 exitPointView = uModelViewMatrix * vec4(vTextureCoord + rayDirection * uLightDistance, 1.0);
 
-  float As = 0.01;
-  float MaxD = 5.0;
+  vec3 entryPoint = entryPointView.xyz / entryPointView.w;
+  vec3 exitPoint = exitPointView.xyz / exitPointView.w;
+
+  float rayLength = length(exitPoint - entryPoint);
+
+  float voxelSize = 1.0 / float(textureSize(uVolume, 0).x);
+  float As = voxelSize * 0.5 / rayLength;
+
   float totalOpacity = 0.0;
   vec4 totalColor = vec4(0.0);
   vec3 current = cameraPosition;
 
-  for (float i = 0.0; i < MaxD; i += As ) {
+  for (float i = 0.0; i < rayLength; i += As ) {
     float voxel = texture(uVolume, current).r;
 
     totalColor += uTF * vec4(uTFColor, 1.0) * uTFOpacity * (1.0 - totalOpacity);
@@ -48,7 +55,7 @@ void main(void) {
 
     if (totalOpacity >= 0.95) break;
 
-    current += normalizedRayDirection * As;
+    current += rayDirection * As;
     
   }
 
