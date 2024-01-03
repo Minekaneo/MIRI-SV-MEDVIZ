@@ -13,17 +13,12 @@ uniform mat4 uProjectionMatrix;
 
 out vec3 vTextureCoord;
 out vec3 cameraPosition;
-out vec3 rayDirection;
 
 void main(void) {
   gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
 
-  vec4 viewPosition = uModelViewMatrix * aVertexPosition;
-
   mat4 inverseModelViewMatrix = inverse(uModelViewMatrix);
-  vec3 cameraPosition = -inverseModelViewMatrix[3].xyz;
-
-  rayDirection = normalize(cameraPosition - viewPosition.xyz);
+  cameraPosition = -inverseModelViewMatrix[3].xyz;
 
   vTextureCoord = aTextureCoord;
 }

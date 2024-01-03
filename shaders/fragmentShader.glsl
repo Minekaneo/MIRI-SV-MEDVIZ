@@ -18,13 +18,14 @@ uniform float uLightPhi;
 uniform float uLightRadius;
 uniform float uLightDistance;
 uniform int uLightNRays;
+uniform int uStrategy;
 //textures
+uniform vec3 uDimensions;
 uniform highp sampler3D uVolume;
 
 //VARYINGS
 in vec3 vTextureCoord;
 in vec3 cameraPosition;
-in vec3 rayDirection;
 
 out vec4 frag_color;
 
@@ -39,23 +40,34 @@ float CalculateY(float x) {
 
 void main(void) {
 
-  vec4 entryPointView = uModelViewMatrix * vec4(vTextureCoord, 1.0);
-  vec4 exitPointView = uModelViewMatrix * vec4(vTextureCoord + rayDirection * uLightDistance, 1.0);
+  vec3 rayDirection = normalize(vTextureCoord - cameraPosition);
 
-  vec3 entryPoint = entryPointView.xyz / entryPointView.w;
-  vec3 exitPoint = exitPointView.xyz / exitPointView.w;
+  vec3 entryPoint = vTextureCoord;
+
+  vec3 cubeMin = vec3(0.0);
+  vec3 cubeMax = vec3(1.0);
+
+  vec3 tMin = (cubeMin - cameraPosition) / rayDirection;
+  vec3 tMax = (cubeMax - cameraPosition) / rayDirection;
+
+  vec3 t1 = min(tMin, tMax);
+  vec3 t2 = max(tMin, tMax);
+  float tNear = max(max(t1.x, t1.y), t1.z);
+  float tFar = min(min(t2.x, t2.y), t2.z);
+
+  vec3 exitPoint = cameraPosition + rayDirection * tNear;
 
   float rayLength = length(exitPoint - entryPoint);
 
-  float voxelSize = 1.0 / float(textureSize(uVolume, 0).x);
-  float As = voxelSize * 0.5 / rayLength;
+  float diagonalLength = sqrt(3.0) * length(uDimensions);
+  float As = diagonalLength / 2.0;
 
   float totalOpacity = 0.0;
   vec4 totalColor = vec4(0.0);
-  vec3 current = cameraPosition;
+  vec3 current = entryPoint;
 
   for (float i = 0.0; i < rayLength; i += As ) {
-    float voxel = CalculateY(texture(uVolume, current).r);
+    float voxel = CalculateY(texture(uVolume, current).x);
 
     totalColor += vec4(uTFColor, 1.0) * uTFOpacity * (1.0 - totalOpacity);
     totalOpacity += uTFOpacity * (1.0 - totalOpacity) * voxel;
@@ -68,8 +80,8 @@ void main(void) {
 
   highp vec4 texelColor = totalColor;
 
-  frag_color = totalColor;
-  
+  frag_color = vec4(exitPoint, 1.0);
+  //frag_color = totalColor;
 }
 
 //send the data to the texture!
